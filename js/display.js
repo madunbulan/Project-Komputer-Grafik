@@ -1,9 +1,4 @@
 /**
- *
- * BOXY RUN
- * ----
- * Character demonstration, created with love by Walvin An
- *
  * Boilerplate for character, scene, camera, renderer, lights taken from
  * https://codepen.io/dalhundal/pen/pJdLjL
  *
