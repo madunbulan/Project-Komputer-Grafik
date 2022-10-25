@@ -45,7 +45,7 @@ function World() {
     var self = this;
 
     // Scoped variables in this world.
-    var element, scene, camera, renderer, light, fogDistance;
+    var element, scene, camera, character, renderer, light, fogDistance;
 
 
     // Initialize the world.
@@ -90,6 +90,11 @@ function World() {
         scene.add(light);
 
 
+        // Initialize the character and add it to the scene.
+        character = new Character();
+        scene.add(character.element);
+
+
         var ground = createBox(3000, 20, 120000, Colors.ground, 0, -400, -60000); //Diana
         var ground2 = createBox(3500, 10, 120000, Colors.sidewalk, 0, -400, -60000); //Lisa
         var ground3 = createBox(50000, 5, 120000, Colors.green, 0, -400, -60000); //Ryan
@@ -111,4 +116,95 @@ function World() {
         camera.aspect = element.clientWidth / element.clientHeight;
         camera.updateProjectionMatrix();
     }
+}
+
+
+function Character() {
+
+    // Explicit binding of this even in changing contexts.
+    var self = this;
+
+    // Character defaults that don't change throughout the game.
+    this.skinColor = Colors.whiteman;
+    this.hairColor = Colors.black;
+    this.shirtColor = Colors.luffy;
+    this.shortsColor = Colors.black;
+
+    // Initialize the character.
+    init();
+
+    /**
+     * Builds the character in depth-first order. The parts of are 
+     * modelled by the following object hierarchy:
+     *
+     * - character (this.element)
+     *    - head
+     *       - face
+     *       - hair
+     *    - torso
+     *    - leftArm
+     *       - leftLowerArm
+     *    - rightArm
+     *       - rightLowerArm
+     *    - leftLeg
+     *       - rightLowerLeg
+     *    - rightLeg
+     *       - rightLowerLeg
+     *
+     * Also set up the starting values for evolving parameters throughout
+     * the game.
+     * 
+     */
+    function init() {
+
+        // Build the character.
+        self.face = createBox(100, 100, 60, self.skinColor, 0, 0, 0);
+        self.hair = createBox(105, 20, 65, self.hairColor, 0, 50, 0);
+        self.head = createGroup(0, 260, -25);
+        self.head.add(self.face);
+        self.head.add(self.hair);
+
+        self.torso = createBox(150, 190, 40, self.shirtColor, 0, 100, 0);
+
+        self.leftLowerArm = createLimb(20, 120, 30, self.skinColor, 0, -170, 0);
+        self.leftArm = createLimb(30, 140, 40, self.skinColor, -100, 190, -10);
+        self.leftArm.add(self.leftLowerArm);
+
+        self.rightLowerArm = createLimb(
+            20, 120, 30, self.skinColor, 0, -170, 0);
+        self.rightArm = createLimb(30, 140, 40, self.skinColor, 100, 190, -10);
+        self.rightArm.add(self.rightLowerArm);
+
+        self.leftLowerLeg = createLimb(40, 200, 40, self.skinColor, 0, -200, 0);
+        self.leftLeg = createLimb(50, 170, 50, self.shortsColor, -50, -10, 30);
+        self.leftLeg.add(self.leftLowerLeg);
+
+        self.rightLowerLeg = createLimb(
+            40, 200, 40, self.skinColor, 0, -200, 0);
+        self.rightLeg = createLimb(50, 170, 50, self.shortsColor, 50, -10, 30);
+        self.rightLeg.add(self.rightLowerLeg);
+
+        self.element = createGroup(0, 0, -4000);
+        self.element.add(self.head);
+        self.element.add(self.torso);
+        self.element.add(self.leftArm);
+        self.element.add(self.rightArm);
+        self.element.add(self.leftLeg);
+        self.element.add(self.rightLeg);
+
+    }
+}
+
+function createGroup(x, y, z) {
+    var group = new THREE.Group();
+    group.position.set(x, y, z);
+    return group;
+}
+
+function createLimb(dx, dy, dz, color, x, y, z) {
+    var limb = createGroup(x, y, z);
+    var offset = -1 * (Math.max(dx, dz) / 2 + dy / 2);
+    var limbBox = createBox(dx, dy, dz, color, 0, offset, 0);
+    limb.add(limbBox);
+    return limb;
 }
