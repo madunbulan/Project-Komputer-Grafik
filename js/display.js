@@ -1,11 +1,11 @@
 /**
- * Boilerplate for character, scene, camera, renderer, lights taken from
+ * Boilerplate untuk karakter, latar, kamera, renderer, cahaya diambil dari
  * https://codepen.io/dalhundal/pen/pJdLjL
  *
  */
 
 /**
- * Constants used in this game.
+ * Konstan yang dipakai dalam game.
  */
 var Colors = {
     cherry: 0xe35d6a,
@@ -22,21 +22,21 @@ var Colors = {
 
 var deg2Rad = Math.PI / 180;
 
-// Make a new world when the page is loaded.
+// Membuat sebuah world ketika page dijalankan.
 window.addEventListener('load', function() {
     new World(document.getElementById('world'));
 });
 
 /**
- * Utility function for generating current values of sinusoidally
- * varying variables. All sinusoids of equal frequency are globally 
- * synced, so the phase argument fully specifies the relative phase.
+ * Fungsi utilitas untuk menghasilkan nilai arus variabel yang bervariasi secara sinusoidal.
+ * Semua sinusoida dengan frekuensi yang sama disinkronkan secara global, 
+ * sehingga fase argumen sepenuhnya menentukan fase relatif.
  *
- * @param {number} FREQUENCY The number of oscillations per second.
- * @param {number} MINIMUM The minimum value of the sinusoid.
- * @param {number} MAXIMUM The maximum value of the sinusoid.
- * @param {number} PHASE The phase offset in degrees.
- * @return {number} The offset of the sinusoid at the current time.
+ * @param {number} FREQUENCY Jumlah getaran per detik.
+ * @param {number} MINIMUM Nilai minimum dari sinus.
+ * @param {number} MAXIMUM Nilai maksimum dari sinus.
+ * @param {number} PHASE Fase offset dari derajat.
+ * @return {number} Offset sinus pada saat ini.
  *
  */
 function sinusoid(frequency, minimum, maximum, phase) {
@@ -51,12 +51,12 @@ function sinusoid(frequency, minimum, maximum, phase) {
 }
 
 /**
- * Creates an empty group of objects at a specified location.
+ * Membuat sebuah grup kosong pada lokasi yang sudah ditentukan. 
  *
- * @param {number} X The x-coordinate of the group.
- * @param {number} Y The y-coordinate of the group.
- * @param {number} Z The z-coordinate of the group.
- * @return {Three.Group} An empty group at the specified coordinates.
+ * @param {number} X Koordinat X pada sebuah grup.
+ * @param {number} Y Koordinat Y pada sebuah grup.
+ * @param {number} Z Koordinat Z pada sebuah grup.
+ * @return {Three.Group} Grup kosong pada lokasi yang sudah ditentukan.
  *
  */
 function createGroup(x, y, z) {
@@ -66,17 +66,17 @@ function createGroup(x, y, z) {
 }
 
 /**
- * Creates and returns a simple box with the specified properties.
+ * Membuat dan mengembalikan sebuah kotak dengan atribut yang sudah ditentukan.
  *
- * @param {number} DX The width of the box.
- * @param {number} DY The height of the box.
- * @param {number} DZ The depth of the box.
- * @param {color} COLOR The color of the box.
- * @param {number} X The x-coordinate of the center of the box.
- * @param {number} Y The y-coordinate of the center of the box.
- * @param {number} Z The z-coordinate of the center of the box.
- * @param {boolean} NOTFLATSHADING True iff the flatShading is false.
- * @return {THREE.Mesh} A box with the specified properties.
+ * @param {number} DX Lebar kotak.
+ * @param {number} DY Tinggi kotak.
+ * @param {number} DZ Kedalaman kotak.
+ * @param {color} COLOR Warna kotak.
+ * @param {number} X Koordinat X pada bagian tengah kotak.
+ * @param {number} Y Koordinat Y pada bagian tengah kotak.
+ * @param {number} Z Koordinat Z pada bagian tengah kotak.
+ * @param {boolean} NOTFLATSHADING Benar jika flatShading salah.
+ * @return {THREE.Mesh} Sebuah kotak dengan atribut yang sudah ditentukan.
  *
  */
 function createBox(dx, dy, dz, color, x, y, z, notFlatShading) {
@@ -93,40 +93,40 @@ function createBox(dx, dy, dz, color, x, y, z, notFlatShading) {
 }
 
 /**
- * The player's character in the game.
+ * Karakter player dalam game.
  */
 function Character() {
 
-    // Explicit binding of this even in changing contexts.
+    // Explicit binding.
     var self = this;
 
-    // Character defaults.
+    // Karakter bawaan (default).
     this.skinColor = Colors.whiteman;
     this.hairColor = Colors.black;
     this.shirtColor = Colors.luffy;
     this.shortsColor = Colors.black;
     this.stepFreq = 2;
 
-    // Initialize the character.
+    // Inisialisasi karakter.
     init();
 
     /**
-     * Builds the character in depth-first order. The parts of are 
-     * modelled by the following object hierarchy:
+     * The parts of are Membangun karakter secara mendalam-langkah pertama.
+     * Dimodelkan berdasarkan objek berikut :
      *
-     * - character (this.element)
-     *    - head
-     *       - face
-     *       - hair
-     *    - torso
-     *    - leftArm
-     *       - leftLowerArm
-     *    - rightArm
-     *       - rightLowerArm
-     *    - leftLeg
-     *       - rightLowerLeg
-     *    - rightLeg
-     *       - rightLowerLeg
+     * - Karakter (this.element)
+     *    - Kepala
+     *       - Wajah
+     *       - Rambut
+     *    - Tubuh
+     *    - Tangan kiri
+     *       - Lengan kiri bawah
+     *    - Tangan kanan
+     *       - Lengan kanan bawah
+     *    - Kaki kiri
+     *       - Kaki kiri bawah
+     *    - Kaki kanan
+     *       - Kaki kanan bawah
      * 
      */
     function init() {
@@ -166,17 +166,17 @@ function Character() {
     }
 
     /**
-     * Creates and returns a limb with an axis of rotation at the top.
+     * Membuat dan mengembalikan sebuah lengan dengan rotasi axis di atas.
      *
-     * @param {number} DX The width of the limb.
-     * @param {number} DY The length of the limb.
-     * @param {number} DZ The depth of the limb.
-     * @param {color} COLOR The color of the limb.
-     * @param {number} X The x-coordinate of the rotation center.
-     * @param {number} Y The y-coordinate of the rotation center.
-     * @param {number} Z The z-coordinate of the rotation center.
-     * @return {THREE.GROUP} A group that includes a box representing
-     *                       the limb, with the specified properties.
+     * @param {number} DX Lebar lengan.
+     * @param {number} DY Panjang lengan.
+     * @param {number} DZ Kedalaman lengan.
+     * @param {color} COLOR Warna lengan.
+     * @param {number} X Koordinat X pada tengah rotasi.
+     * @param {number} Y Koordinat Y pada tengah rotasi.
+     * @param {number} Z Koordinat Z pada tengah rotasi.
+     * @return {THREE.GROUP} Grup yang meliputi sebuah kotak yang berisikan anggota tubuh
+     *                       dengan atribut yang sudah ditentukan.
      *
      */
     function createLimb(dx, dy, dz, color, x, y, z) {
@@ -188,7 +188,7 @@ function Character() {
     }
 
     /**
-     * A method called on the character when time moves forward.
+     * Sebuah method dipanggil pada karakter ketika waktu bergerak maju.
      */
     this.update = function() {
         self.element.rotation.y += 0.02;
@@ -208,26 +208,26 @@ function Character() {
 }
 
 /** 
- * The world in which Boxy Run takes place.
+ * World dimana Wild Run ditempatkan.
  */
 function World(element) {
 
-    // Explicit binding of this even in changing contexts.
+    // Explicit binding.
     var self = this;
 
-    // Scoped variables in this world.
+    // Variabel yang ada pada world.
     var scene, camera, character, renderer, light, shadowLight;
 
-    // Initialize the world.
+    // Inisialisasi world.
     init();
 
     /**
-     * Builds the renderer, scene, lights, camera, and the character,
-     * then begins the rendering loop.
+     * Membangun renderer, latar, cahaya, kamera, dan karakter,
+     * lalu mulai dengan loop rendering.
      */
     function init() {
 
-        // Initialize the renderer.
+        // Inisialisasi renderer.
         renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true
@@ -236,11 +236,11 @@ function World(element) {
         renderer.shadowMap.enabled = true;
         element.appendChild(renderer.domElement);
 
-        // Initialize the scene.
+        // Inisialisasi latar.
         scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0x363d3d, -1, 3000);
 
-        // Initialize the lights.
+        // Inisialisasi cahaya.
         light = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.9);
         shadowLight = new THREE.DirectionalLight(0xffffff, 0.9);
         shadowLight.position.set(200, 200, 200);
@@ -248,28 +248,27 @@ function World(element) {
         scene.add(light);
         scene.add(shadowLight);
 
-        // Initialize the camera with field of view, aspect ratio,
-        // near plane, and far plane.
+        // Inisialisasi kamera dengan field of view, aspek rasio, bidang dekat dan jauh.
         camera = new THREE.PerspectiveCamera(
             60, window.innerWidth / window.innerHeight, 1, 2000);
         camera.position.set(0, 400, 800);
         camera.lookAt(new THREE.Vector3(0, 150, 0));
         window.camera = camera;
 
-        // Set up resizing capabilities.
+        // Menyiapkan kemampuan untuk mengubah sebuah ukuran.
         window.addEventListener('resize', handleWindowResize, false);
 
-        // Initialize the character and add it to the scene.
+        // Iniasialisasi karakter dan memasukannya ke dalam latar.
         character = new Character();
         scene.add(character.element);
 
-        // Begin the rendering loop.
+        // Mulai rendering loop.
         loop();
 
     }
 
     /**
-     * The main animation loop.
+     * Animasi loop utama.
      */
     function loop() {
         character.update();
@@ -278,7 +277,7 @@ function World(element) {
     }
 
     /**
-     * A method called when window is resized.
+     * Sebuah method dipanggil ketika layar dirubah ukurannya.
      */
     function handleWindowResize() {
         renderer.setSize(window.innerWidth, window.innerHeight);
