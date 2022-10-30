@@ -1,3 +1,4 @@
+// deklarasi palet warna yang digunakan untuk objek dalam game
 var Colors = {
     cherry: 0xe35d6a,
     blue: 0x1560bd,
@@ -18,49 +19,54 @@ var Colors = {
     whiteman: 0xc68642,
     luffy: 0xa90000,
 };
-//template warna dicari bersama
 
+var deg2Rad = Math.PI / 180;
 
-// Make a new world when the page is loaded.
+// Membuat world baru ketika halaman dimuat.
 window.addEventListener('load', function() {
     new World();
 });
 
-/** 
- *
- * THE WORLD
- * 
- * The world in which Boxy Run takes place.
- *
- */
 
-/** 
- * A class of which the world is an instance. Initializes the game
- * and contains the main game loop.
- *
- */
+
+
+//sebuah class yang memiliki instance bernama "world" dimana skenario game dan loop game (update animasi, dll) diinisialisasikan.
 function World() {
 
-    // Explicit binding of this even in changing contexts.
+    // Explicit binding
     var self = this;
 
-    // Scoped variables in this world.
-    var element, scene, camera, character, renderer, light, fogDistance;
+    // mendeklarasikan variabel yang akan digunakan dalam instance world ini.
+    var element, scene, camera, character, renderer, light, keysAllowed, fogDistance;
+
+    // menggunakan library howler.js untuk memasukkan audio ke dalam game
+    // deklarasi audio yang akan digunakan
+    var music = {
+        overworld: new Howl({
+            src: [
+                "audio/howler-demo-bg-music.mp3"
+            ],
+            // autoplay: true,
+            loop: true
+        })
+    }
 
 
-    // Initialize the world.
+    // inisialisasi world.
     init();
 
     /**
-     * Builds the renderer, scene, lights, camera, and the character,
-     * then begins the rendering loop.
+     * membuat renderer, scene, lights, camera, dan karakter untuk game,
+     * kemudian melakukan looping terhadap renderer.
      */
     function init() {
 
-        // Locate where the world is to be located on the screen.
+        // mencari dimana envinroment game (world) akan ditempatkan.
         element = document.getElementById('world');
+        // memainkan background musik
+        music.overworld.play()
 
-        // Initialize the renderer.
+        // inisialisasi renderer.
         renderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true
@@ -69,47 +75,112 @@ function World() {
         renderer.shadowMap.enabled = true;
         element.appendChild(renderer.domElement);
 
-        // Initialize the scene.
+        //inisialisasi scene.
         scene = new THREE.Scene();
         fogDistance = 40000;
         scene.fog = new THREE.Fog(0xf0fff0, 1, fogDistance);
 
-        // Initialize the camera with field of view, aspect ratio,
-        // near plane, and far plane.
+
+        // inisialisasi camera dengan fov, aspect ratio, near plane dan far plane.
+        // game ini menggunakan camera dengan tipe persepective camera.
         camera = new THREE.PerspectiveCamera(
             60, element.clientWidth / element.clientHeight, 1, 120000);
         camera.position.set(0, 1500, -2000);
         camera.lookAt(new THREE.Vector3(0, 600, -5000));
         window.camera = camera;
 
-        // Set up resizing capabilities.
+        //membuat game responsive (dapat menyesuaikan layar), dengan memanggil fungsi handleWindowResize.
         window.addEventListener('resize', handleWindowResize, false);
 
-        // Initialize the lights.
+        //inisialisasi lighting (pencahayaan) yang digunakan dalam game.
         light = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
         scene.add(light);
 
-
-        // Initialize the character and add it to the scene.
+        //inisialisasi karakter yang digunakan dalam game dan memasukkannya ke dalam scene.
         character = new Character();
         scene.add(character.element);
 
-
-        var ground = createBox(3000, 20, 120000, Colors.ground, 0, -400, -60000); //Diana
-        var ground2 = createBox(3500, 10, 120000, Colors.sidewalk, 0, -400, -60000); //Lisa
-        var ground3 = createBox(50000, 5, 120000, Colors.green, 0, -400, -60000); //Ryan
-        var line1 = createBox(40, 20, 120000, Colors.roadLine, 50, -400, -60000); //Elvin
-        var line2 = createBox(40, 20, 120000, Colors.roadLine, -50, -400, -60000); //Elvin
+        // membuat jalanan, garis jalanan, dan pinggir jalanan menggunakan fungsi createbox (berfungsi untuk membuat mesh berbentuk box).
+        var ground = createBox(3000, 20, 120000, Colors.ground, 0, -400, -60000);
+        var ground2 = createBox(3500, 10, 120000, Colors.sidewalk, 0, -400, -60000);
+        var ground3 = createBox(50000, 5, 120000, Colors.green, 0, -400, -60000);
+        var line1 = createBox(40, 20, 120000, Colors.roadLine, 50, -400, -60000);
+        var line2 = createBox(40, 20, 120000, Colors.roadLine, -50, -400, -60000);
         scene.add(ground);
         scene.add(ground2);
         scene.add(ground3);
         scene.add(line1);
         scene.add(line2);
-        renderer.render(scene, camera);
+
+
+
+
+
+        //keycode
+        var left = 37;
+        var up = 38;
+        var right = 39;
+        var p = 80;
+
+
+        //sfx jump menggunakan howler.js
+        var sfx = {
+            jump: new Howl({
+                src: [
+                    'Audio/jump sound.mp3',
+                ]
+            }),
+        }
+
+        //menerima input keyboard user untuk menggerakan karakter (atas, kiri, kanan)
+        keysAllowed = {};
+        document.addEventListener(
+            'keydown',
+            function(e) {
+                var key = e.keyCode;
+                if (key == up) {
+                    character.onUpKeyPressed();
+                    sfx.jump.play();
+                }
+                if (key == left) {
+                    character.onLeftKeyPressed();
+                }
+                if (key == right) {
+                    character.onRightKeyPressed();
+                }
+            }
+        );
+        document.addEventListener(
+            'keyup',
+            function(e) {
+                keysAllowed[e.keyCode] = true;
+            }
+        );
+        document.addEventListener(
+            'focus',
+            function(e) {
+                keysAllowed = {};
+            }
+        );
+
+        //memulai loop rendering.
+        loop();
+
     }
 
     /**
-     * A method called when window is resized.
+     * Loop animasi utama.
+     */
+    function loop() {
+        // membuat karakter bergerak sesuai dengan input kontrol user.
+        character.update();
+        // Render the page and repeat.
+        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
+    }
+
+    /**
+     * fungsi yang membuat game menjadi responsive.
      */
     function handleWindowResize() {
         renderer.setSize(element.clientWidth, element.clientHeight);
@@ -119,45 +190,29 @@ function World() {
 }
 
 
+/**
+ * Karakter yang digunakan dalam game.
+ * Sumber template karakter: https://codepen.io/dalhundal/pen/pJdLjL
+ */
 function Character() {
 
-    // Explicit binding of this even in changing contexts.
+    // Explicit binding
     var self = this;
 
-    // Character defaults that don't change throughout the game.
+    //Settingan karakter (seperti warna kulit, baju, durasi lompat, dll)
     this.skinColor = Colors.whiteman;
     this.hairColor = Colors.black;
     this.shirtColor = Colors.luffy;
     this.shortsColor = Colors.black;
+    this.jumpDuration = 0.6;
+    this.jumpHeight = 2000;
 
-    // Initialize the character.
+    // inisiasliasi karakter
     init();
 
-    /**
-     * Builds the character in depth-first order. The parts of are 
-     * modelled by the following object hierarchy:
-     *
-     * - character (this.element)
-     *    - head
-     *       - face
-     *       - hair
-     *    - torso
-     *    - leftArm
-     *       - leftLowerArm
-     *    - rightArm
-     *       - rightLowerArm
-     *    - leftLeg
-     *       - rightLowerLeg
-     *    - rightLeg
-     *       - rightLowerLeg
-     *
-     * Also set up the starting values for evolving parameters throughout
-     * the game.
-     * 
-     */
     function init() {
 
-        // Build the character.
+        // membangun bentuk karakter.
         self.face = createBox(100, 100, 60, self.skinColor, 0, 0, 0);
         self.hair = createBox(105, 20, 65, self.hairColor, 0, 50, 0);
         self.head = createGroup(0, 260, -25);
@@ -179,8 +234,7 @@ function Character() {
         self.leftLeg = createLimb(50, 170, 50, self.shortsColor, -50, -10, 30);
         self.leftLeg.add(self.leftLowerLeg);
 
-        self.rightLowerLeg = createLimb(
-            40, 200, 40, self.skinColor, 0, -200, 0);
+        self.rightLowerLeg = createLimb(40, 200, 40, self.skinColor, 0, -200, 0);
         self.rightLeg = createLimb(50, 170, 50, self.shortsColor, 50, -10, 30);
         self.rightLeg.add(self.rightLowerLeg);
 
@@ -192,8 +246,138 @@ function Character() {
         self.element.add(self.leftLeg);
         self.element.add(self.rightLeg);
 
+        // inisialisasi perubahan parameter karakter (kalo loncat, gerak, pindah kiri kanan, dll)
+        self.isJumping = false;
+        self.isSwitchingLeft = false;
+        self.isSwitchingRight = false;
+        self.currentLane = 0;
+        self.runningStartTime = new Date() / 1000;
+        self.stepFreq = 2;
+        self.queuedActions = [];
+
     }
+
+
+    function createLimb(dx, dy, dz, color, x, y, z) {
+        var limb = createGroup(x, y, z);
+        var offset = -1 * (Math.max(dx, dz) / 2 + dy / 2);
+        var limbBox = createBox(dx, dy, dz, color, 0, offset, 0);
+        limb.add(limbBox);
+        return limb;
+    }
+
+
+    this.update = function() {
+
+        var currentTime = new Date() / 1000;
+
+
+        if (!self.isJumping &&
+            !self.isSwitchingLeft &&
+            !self.isSwitchingRight &&
+            self.queuedActions.length > 0) {
+            switch (self.queuedActions.shift()) {
+                case "up":
+                    self.isJumping = true;
+                    self.jumpStartTime = new Date() / 1000;
+                    break;
+                case "left":
+                    if (self.currentLane != -1) {
+                        self.isSwitchingLeft = true;
+                    }
+                    break;
+                case "right":
+                    if (self.currentLane != 1) {
+                        self.isSwitchingRight = true;
+                    }
+                    break;
+            }
+        }
+
+
+        if (self.isJumping) {
+            var jumpClock = currentTime - self.jumpStartTime;
+            self.element.position.y = self.jumpHeight * Math.sin(
+                    (1 / self.jumpDuration) * Math.PI * jumpClock) +
+                sinusoid(2 * self.stepFreq, 0, 20, 0,
+                    self.jumpStartTime - self.runningStartTime);
+            if (jumpClock > self.jumpDuration) {
+                self.isJumping = false;
+                self.runningStartTime += self.jumpDuration;
+            }
+        } else {
+            var runningClock = currentTime - self.runningStartTime;
+            self.element.position.y = sinusoid(
+                2 * self.stepFreq, 0, 20, 0, runningClock);
+            self.head.rotation.x = sinusoid(
+                2 * self.stepFreq, -10, -5, 0, runningClock) * deg2Rad;
+            self.torso.rotation.x = sinusoid(
+                2 * self.stepFreq, -10, -5, 180, runningClock) * deg2Rad;
+            self.leftArm.rotation.x = sinusoid(
+                self.stepFreq, -70, 50, 180, runningClock) * deg2Rad;
+            self.rightArm.rotation.x = sinusoid(
+                self.stepFreq, -70, 50, 0, runningClock) * deg2Rad;
+            self.leftLowerArm.rotation.x = sinusoid(
+                self.stepFreq, 70, 140, 180, runningClock) * deg2Rad;
+            self.rightLowerArm.rotation.x = sinusoid(
+                self.stepFreq, 70, 140, 0, runningClock) * deg2Rad;
+            self.leftLeg.rotation.x = sinusoid(
+                self.stepFreq, -20, 80, 0, runningClock) * deg2Rad;
+            self.rightLeg.rotation.x = sinusoid(
+                self.stepFreq, -20, 80, 180, runningClock) * deg2Rad;
+            self.leftLowerLeg.rotation.x = sinusoid(
+                self.stepFreq, -130, 5, 240, runningClock) * deg2Rad;
+            self.rightLowerLeg.rotation.x = sinusoid(
+                self.stepFreq, -130, 5, 60, runningClock) * deg2Rad;
+
+            if (self.isSwitchingLeft) {
+                self.element.position.x -= 200;
+                var offset = self.currentLane * 800 - self.element.position.x;
+                if (offset > 800) {
+                    self.currentLane -= 1;
+                    self.element.position.x = self.currentLane * 800;
+                    self.isSwitchingLeft = false;
+                }
+            }
+            if (self.isSwitchingRight) {
+                self.element.position.x += 200;
+                var offset = self.element.position.x - self.currentLane * 800;
+                if (offset > 800) {
+                    self.currentLane += 1;
+                    self.element.position.x = self.currentLane * 800;
+                    self.isSwitchingRight = false;
+                }
+            }
+        }
+    }
+
+    this.onLeftKeyPressed = function() {
+        self.queuedActions.push("left");
+    }
+
+
+    this.onUpKeyPressed = function() {
+        self.queuedActions.push("up");
+    }
+
+    this.onRightKeyPressed = function() {
+        self.queuedActions.push("right");
+    }
+
+
 }
+
+
+function sinusoid(frequency, minimum, maximum, phase, time) {
+    var amplitude = 0.5 * (maximum - minimum);
+    var angularFrequency = 2 * Math.PI * frequency;
+    var phaseRadians = phase * Math.PI / 180;
+    var offset = amplitude * Math.sin(
+        angularFrequency * time + phaseRadians);
+    var average = (minimum + maximum) / 2;
+    return average + offset;
+}
+
 
 function createGroup(x, y, z) {
     var group = new THREE.Group();
@@ -201,10 +385,19 @@ function createGroup(x, y, z) {
     return group;
 }
 
-function createLimb(dx, dy, dz, color, x, y, z) {
-    var limb = createGroup(x, y, z);
-    var offset = -1 * (Math.max(dx, dz) / 2 + dy / 2);
-    var limbBox = createBox(dx, dy, dz, color, 0, offset, 0);
-    limb.add(limbBox);
-    return limb;
+
+function createCylinder(radiusTop, radiusBottom, height, radialSegments,
+    color, x, y, z) {
+    var geom = new THREE.CylinderGeometry(
+        radiusTop, radiusBottom, height, radialSegments);
+    var mat = new THREE.MeshPhongMaterial({
+        color: color,
+        flatShading: true
+    });
+    var cylinder = new THREE.Mesh(geom, mat);
+    cylinder.castShadow = true;
+    cylinder.receiveShadow = true;
+    cylinder.position.set(x, y, z);
+    return cylinder;
+
 }

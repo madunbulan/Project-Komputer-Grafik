@@ -1,3 +1,4 @@
+// fungsi untuk membuat mesh box yang dapat di atur lebar panjang warna dll.
 function createBox(dx, dy, dz, color, x, y, z, notFlatShading) {
     var geom = new THREE.BoxGeometry(dx, dy, dz);
     var mat = new THREE.MeshPhongMaterial({
