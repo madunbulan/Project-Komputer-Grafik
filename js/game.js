@@ -257,7 +257,20 @@ function Character() {
 
     }
 
-
+    /**
+     * Membuat dan mengembalikan sebuah lengan dengan rotasi axis di atas.
+     *
+     * @param {number} DX Lebar lengan.
+     * @param {number} DY Panjang lengan.
+     * @param {number} DZ Kedalaman lengan.
+     * @param {color} COLOR Warna lengan.
+     * @param {number} X Koordinat X pada tengah rotasi.
+     * @param {number} Y Koordinat Y pada tengah rotasi.
+     * @param {number} Z Koordinat Z pada tengah rotasi.
+     * @return {THREE.GROUP} Grup yang meliputi sebuah kotak yang berisikan anggota tubuh
+     *                       dengan atribut yang sudah ditentukan.
+     *
+     */
     function createLimb(dx, dy, dz, color, x, y, z) {
         var limb = createGroup(x, y, z);
         var offset = -1 * (Math.max(dx, dz) / 2 + dy / 2);
@@ -266,12 +279,15 @@ function Character() {
         return limb;
     }
 
-
+    /**
+     * Sebuah method dipanggil pada karakter ketika waktu bergerak maju.
+     */
     this.update = function() {
 
+        // Mendapatkan waktu sekarang untuk perhitungan kedepannya.
         var currentTime = new Date() / 1000;
 
-
+        // Menerapkan aksi pada karakter jika sedang tidak melakukan sesuatu.
         if (!self.isJumping &&
             !self.isSwitchingLeft &&
             !self.isSwitchingRight &&
@@ -294,7 +310,8 @@ function Character() {
             }
         }
 
-
+        // Jika karakter melompat, mengupdate tinggi dari karakter.
+        // Jika tidak, karakter akan lanjur berlari.
         if (self.isJumping) {
             var jumpClock = currentTime - self.jumpStartTime;
             self.element.position.y = self.jumpHeight * Math.sin(
@@ -330,6 +347,7 @@ function Character() {
             self.rightLowerLeg.rotation.x = sinusoid(
                 self.stepFreq, -130, 5, 60, runningClock) * deg2Rad;
 
+            // Jika karakter tidak melompat, karakter bisa pindah jalur.
             if (self.isSwitchingLeft) {
                 self.element.position.x -= 200;
                 var offset = self.currentLane * 800 - self.element.position.x;
@@ -351,23 +369,43 @@ function Character() {
         }
     }
 
+    /**
+     * Mengatur karakter ketika tombol kiri diklik.
+     */
     this.onLeftKeyPressed = function() {
         self.queuedActions.push("left");
     }
 
-
+    /**
+     * Mengatur karakter ketika tumbol atas diklik.
+     */
     this.onUpKeyPressed = function() {
         self.queuedActions.push("up");
     }
 
+    /**
+     * Mengatur karakter ketika tumbol kanan diklik.
+     */
     this.onRightKeyPressed = function() {
         self.queuedActions.push("right");
     }
 
+    /**
+     * Mengatur karakter ketika game sedang dipause.
+     */
 
 }
 
-
+/**
+ * Fungsi utilitas untuk menghasilkan nilai arus variabel yang bervariasi secara sinusoidal.
+ *
+ * @param {number} FREQUENCY Jumlah getaran per detik.
+ * @param {number} MINIMUM Nilai minimum dari sinus.
+ * @param {number} MAXIMUM Nilai maksimum dari sinus.
+ * @param {number} PHASE Fase offset dari derajat.
+ * @return {number} Offset sinus pada saat ini.
+ *
+ */
 function sinusoid(frequency, minimum, maximum, phase, time) {
     var amplitude = 0.5 * (maximum - minimum);
     var angularFrequency = 2 * Math.PI * frequency;
@@ -378,14 +416,34 @@ function sinusoid(frequency, minimum, maximum, phase, time) {
     return average + offset;
 }
 
-
+/**
+ * Membuat sebuah grup kosong pada lokasi yang sudah ditentukan. 
+ *
+ * @param {number} X Koordinat X pada sebuah grup.
+ * @param {number} Y Koordinat Y pada sebuah grup.
+ * @param {number} Z Koordinat Z pada sebuah grup.
+ * @return {Three.Group} Grup kosong pada lokasi yang sudah ditentukan.
+ *
+ */
 function createGroup(x, y, z) {
     var group = new THREE.Group();
     group.position.set(x, y, z);
     return group;
 }
 
-
+/**
+ * Membuat dan mengembalikan sebuah silinder dengan atribut yang sudah ditentukan.
+ *
+ * @param {number} RADIUSTOP Radius silinder diatas.
+ * @param {number} RADIUSBOTTOM Radius silinder dibawah.
+ * @param {number} HEIGHT Lebar silinder.
+ * @param {number} RADIALSEGMENTS Jumlah wajah tersegmentasi di sekitar keliling silinder.                             
+ * @param {color} COLOR Warna silinder.
+ * @param {number} X Koordinat X pada tengah silinder.
+ * @param {number} Y Koordinat Y pada tengah silinder.
+ * @param {number} Z Koordinat Z pada tengah silinder.
+ * @return {THREE.Mesh} Sebuah kotak dengan atribut yang sudah ditentukan.
+ */
 function createCylinder(radiusTop, radiusBottom, height, radialSegments,
     color, x, y, z) {
     var geom = new THREE.CylinderGeometry(
