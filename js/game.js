@@ -37,7 +37,9 @@ function World() {
     var self = this;
 
     // mendeklarasikan variabel yang akan digunakan dalam instance world ini.
-    var element, scene, camera, character, renderer, light, keysAllowed, fogDistance;
+    var element, scene, camera, character, renderer, light,
+        objects, paused, keysAllowed, score, difficulty,
+        treePresenceProb, maxTreeSize, fogDistance, gameOver;
 
     // menggunakan library howler.js untuk memasukkan audio ke dalam game
     // deklarasi audio yang akan digunakan
@@ -63,8 +65,6 @@ function World() {
 
         // mencari dimana envinroment game (world) akan ditempatkan.
         element = document.getElementById('world');
-        // memainkan background musik
-        music.overworld.play()
 
         // inisialisasi renderer.
         renderer = new THREE.WebGLRenderer({
@@ -113,7 +113,17 @@ function World() {
         scene.add(line2);
 
 
+        objects = [];
+        treePresenceProb = 0.2;
+        maxTreeSize = 0.5;
+        for (var i = 10; i < 40; i++) {
+            createRowOfTrees(i * -3000, treePresenceProb, 0.5, maxTreeSize);
+        }
 
+
+
+        gameOver = false;
+        paused = true;
 
 
         //keycode
@@ -123,13 +133,18 @@ function World() {
         var p = 80;
 
 
-        //sfx jump menggunakan howler.js
+        //sfx jump dan gambarover menggunakan howler.js
         var sfx = {
             jump: new Howl({
                 src: [
-                    'Audio/jump sound.mp3',
+                    'audio/jump sound.mp3',
                 ]
             }),
+            gameover: new Howl({
+                src: [
+                    'audio/bone crack.mp3',
+                ]
+            })
         }
 
         //menerima input keyboard user untuk menggerakan karakter (atas, kiri, kanan)
@@ -137,16 +152,32 @@ function World() {
         document.addEventListener(
             'keydown',
             function(e) {
-                var key = e.keyCode;
-                if (key == up) {
-                    character.onUpKeyPressed();
-                    sfx.jump.play();
-                }
-                if (key == left) {
-                    character.onLeftKeyPressed();
-                }
-                if (key == right) {
-                    character.onRightKeyPressed();
+                if (!gameOver) {
+                    var key = e.keyCode;
+                    if (keysAllowed[key] === false) return;
+                    keysAllowed[key] = false;
+                    if (paused && !collisionsDetected() && key > 18) {
+                        // memainkan background musik
+                        music.overworld.play()
+                        paused = false;
+                        character.onUnpause();
+                    } else {
+                        if (key == p) {
+                            paused = true;
+                            music.overworld.pause()
+                            character.onPause()
+                        }
+                        if (key == up && !paused) {
+                            character.onUpKeyPressed();
+                            sfx.jump.play();
+                        }
+                        if (key == left && !paused) {
+                            character.onLeftKeyPressed();
+                        }
+                        if (key == right && !paused) {
+                            character.onRightKeyPressed();
+                        }
+                    }
                 }
             }
         );
@@ -172,9 +203,91 @@ function World() {
      * Loop animasi utama.
      */
     function loop() {
-        // membuat karakter bergerak sesuai dengan input kontrol user.
-        character.update();
-        // Render the page and repeat.
+
+        if (!paused) {
+
+            if ((objects[objects.length - 1].mesh.position.z) % 3000 == 0) {
+                difficulty += 1;
+                var levelLength = 30;
+                if (difficulty % levelLength == 0) {
+                    var level = difficulty / levelLength;
+                    switch (level) {
+                        case 1:
+                            treePresenceProb = 0.35;
+                            maxTreeSize = 0.5;
+                            break;
+                        case 2:
+                            treePresenceProb = 0.35;
+                            maxTreeSize = 0.85;
+                            break;
+                        case 3:
+                            treePresenceProb = 0.5;
+                            maxTreeSize = 0.85;
+                            break;
+                        case 4:
+                            treePresenceProb = 0.5;
+                            maxTreeSize = 1.1;
+                            break;
+                        case 5:
+                            treePresenceProb = 0.5;
+                            maxTreeSize = 1.1;
+                            break;
+                        case 6:
+                            treePresenceProb = 0.55;
+                            maxTreeSize = 1.1;
+                            break;
+                        default:
+                            treePresenceProb = 0.55;
+                            maxTreeSize = 1.25;
+                    }
+                }
+                if ((difficulty >= 5 * levelLength && difficulty < 6 * levelLength)) {
+                    fogDistance -= (25000 / levelLength);
+                } else if (difficulty >= 8 * levelLength && difficulty < 9 * levelLength) {
+                    fogDistance -= (5000 / levelLength);
+                }
+                createRowOfTrees(-120000, treePresenceProb, 0.5, maxTreeSize);
+                scene.fog.far = fogDistance;
+            }
+
+
+            objects.forEach(function(object) {
+                object.mesh.position.z += 100;
+            });
+
+
+            objects = objects.filter(function(object) {
+                return object.mesh.position.z < 0;
+            });
+
+
+            character.update();
+
+            var sfxz = {
+                gameover: new Howl({
+                    src: [
+                        'Audio/bone crack.mp3',
+                    ]
+                })
+            }
+
+
+            if (collisionsDetected()) {
+                music.overworld.stop()
+                sfxz.gameover.play();
+                gameOver = true;
+                paused = true;
+                document.addEventListener(
+                    'keydown',
+                    function(e) {
+                        if (e.keyCode == 40)
+                            document.location.reload(true);
+                    }
+                );
+
+            }
+        }
+
         renderer.render(scene, camera);
         requestAnimationFrame(loop);
     }
@@ -186,6 +299,36 @@ function World() {
         renderer.setSize(element.clientWidth, element.clientHeight);
         camera.aspect = element.clientWidth / element.clientHeight;
         camera.updateProjectionMatrix();
+    }
+
+
+    function createRowOfTrees(position, probability, minScale, maxScale) {
+        for (var lane = -1; lane < 2; lane++) {
+            var randomNumber = Math.random();
+            if (randomNumber < probability) {
+                var scale = minScale + (maxScale - minScale) * Math.random();
+                var tree = new Tree(lane * 800, -400, position, scale);
+                objects.push(tree);
+                scene.add(tree.mesh);
+            }
+        }
+    }
+
+
+    function collisionsDetected() {
+        var charMinX = character.element.position.x - 115;
+        var charMaxX = character.element.position.x + 115;
+        var charMinY = character.element.position.y - 310;
+        var charMaxY = character.element.position.y + 320;
+        var charMinZ = character.element.position.z - 40;
+        var charMaxZ = character.element.position.z + 40;
+        for (var i = 0; i < objects.length; i++) {
+            if (objects[i].collides(charMinX, charMaxX, charMinY,
+                    charMaxY, charMinZ, charMaxZ)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -252,6 +395,7 @@ function Character() {
         self.isSwitchingRight = false;
         self.currentLane = 0;
         self.runningStartTime = new Date() / 1000;
+        self.pauseStartTime = new Date() / 1000;
         self.stepFreq = 2;
         self.queuedActions = [];
 
@@ -393,6 +537,56 @@ function Character() {
     /**
      * Mengatur karakter ketika game sedang dipause.
      */
+    this.onPause = function() {
+        self.pauseStartTime = new Date() / 1000;
+    }
+
+    /**
+     * Mengatur karakter ketika game tidak dipause.
+     */
+    this.onUnpause = function() {
+        var currentTime = new Date() / 1000;
+        var pauseDuration = currentTime - self.pauseStartTime;
+        self.runningStartTime += pauseDuration;
+        if (self.isJumping) {
+            self.jumpStartTime += pauseDuration;
+        }
+    }
+
+}
+
+
+function Tree(x, y, z, s) {
+
+    // Explicit binding.
+    var self = this;
+
+    // The object portrayed in the scene.
+    this.mesh = new THREE.Object3D();
+    var top = createCylinder(1, 300, 300, 4, Colors.green, 0, 1000, 0);
+    var mid = createCylinder(1, 400, 400, 4, Colors.green, 0, 800, 0);
+    var bottom = createCylinder(1, 500, 500, 4, Colors.green, 0, 500, 0);
+    var trunk = createCylinder(100, 100, 250, 32, Colors.brownDark, 0, 125, 0);
+    this.mesh.add(top);
+    this.mesh.add(mid);
+    this.mesh.add(bottom);
+    this.mesh.add(trunk);
+    this.mesh.position.set(x, y, z);
+    this.mesh.scale.set(s, s, s);
+    this.scale = s;
+
+
+    this.collides = function(minX, maxX, minY, maxY, minZ, maxZ) {
+        var treeMinX = self.mesh.position.x - this.scale * 250;
+        var treeMaxX = self.mesh.position.x + this.scale * 250;
+        var treeMinY = self.mesh.position.y;
+        var treeMaxY = self.mesh.position.y + this.scale * 1150;
+        var treeMinZ = self.mesh.position.z - this.scale * 250;
+        var treeMaxZ = self.mesh.position.z + this.scale * 250;
+        return treeMinX <= maxX && treeMaxX >= minX &&
+            treeMinY <= maxY && treeMaxY >= minY &&
+            treeMinZ <= maxZ && treeMaxZ >= minZ;
+    }
 
 }
 
@@ -458,4 +652,8 @@ function createCylinder(radiusTop, radiusBottom, height, radialSegments,
     cylinder.position.set(x, y, z);
     return cylinder;
 
+}
+
+function restart() {
+    document.location.reload(true);
 }
