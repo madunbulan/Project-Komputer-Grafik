@@ -10,7 +10,48 @@
 </head>
 
 <body>
+    <div class="panel">
+        <div id="game-title" class="game-title">
+            <div class="title">Wild Run</div>
+        </div>
+        <table id="controls">
+            <tr>
+                <td class="tdcontrol">Up:</td>
+                <td class="tdcontrol">Jump</td>
+            </tr>
+            <tr>
+                <td class="tdcontrol">Left:</td>
+                <td class="tdcontrol">Left lane switch</td>
+            </tr>
+            <tr>
+                <td class="tdcontrol">Right:</td>
+                <td class="tdcontrol">Right lane switch</td>
+            </tr>
+            <tr>
+                <td class="tdcontrol">p:</td>
+                <td class="tdcontrol">Pause</td>
+            </tr>
+        </table>
+        <div class="animate-flicker" id="variable-content">Press any button to begin</div>
+    </div>
     <div id="world"></div>
+    <div id="pauseScreen">
+        <div id="subScreen">
+            <h1 id="titlez"> GAME PAUSED </h1>
+            <h1 class="animate-flicker" id="instructionsz"> Press "P" to resume playing! </h1>
+        </div>
+    </div>
+    <div id="lossScreen">
+        <div id="subScreen">
+            <h1 id="titlegameover">Game Over!</h1>
+            <h2 id="instructionsz">Click "Restart Game" or press the down arrow key!</h2>
+            <div id="buttons">
+                <button class="button" onclick="restart()"> Restart Game </button>
+            </div>
+        </div>
+
+
+    </div>
 </body>
 
 </html>

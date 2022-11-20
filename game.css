@@ -28,26 +28,48 @@ a {
     text-decoration: none;
 }
 
-table {
+.panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2em 3em;
+    width: 25%;
+    box-sizing: border-box;
+}
+
+.game-title {
+    z-index: 100;
+    position: relative;
+    text-align: center;
+}
+
+.game-title .title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 3em;
+}
+
+table#controls {
     width: 100%;
     box-sizing: border-box;
     margin-top: 2em;
 }
 
 td {
+    padding: 2px;
     letter-spacing: 0.1em;
-    font-size: 0.7em;
+    font-size: 1.8vmin;
     text-transform: uppercase;
     font-weight: 400;
 }
 
-td:first-child {
+.tdcontrol:first-child {
     width: 30%;
     text-align: right;
     padding-right: 0.5em;
 }
 
-td:nth-child(2) {
+.tdcontrol:nth-child(2) {
     width: 70%;
     text-align: left;
     padding-left: 0.5em;
@@ -143,4 +165,72 @@ canvas {
     width: 100vw;
     height: 100vh;
     display: block;
+}
+
+#pauseScreen {
+    display: none;
+}
+
+#subScreen {
+    position: fixed;
+    bottom: 0;
+    background: rgba(0, 0, 0.5, 0.5);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+    color: white;
+    z-index: 499;
+}
+
+#titlez {
+    color: white;
+    font-family: Piedra;
+    font-size: 15vmin;
+    margin-top: 2em;
+}
+
+#instructionsz {
+    color: white;
+    font-size: 3vmin;
+    margin: 20px;
+    font-family: 'Playfair Display', serif;
+}
+
+#buttons {
+    position: relative;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0);
+    height: 50%;
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+    color: white;
+    z-index: 500;
+}
+
+.button {
+    width: 220px;
+    font-size: 40px;
+    padding: 10px;
+    border: none;
+    background: #66990059;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 25px;
+    margin-top: 0.5em;
+}
+
+#titlegameover {
+    color: white;
+    font-family: Piedra;
+    font-size: 15vmin;
+    margin-top: 1em;
+    position: realtive;
+    z-index: 101;
+}
+
+#lossScreen {
+    display: none;
 }

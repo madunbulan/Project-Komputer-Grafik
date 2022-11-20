@@ -161,9 +161,22 @@ function World() {
                         music.overworld.play()
                         paused = false;
                         character.onUnpause();
+                        //menyembunyikan instruksi permainan jika game sudah dimulai
+                        document.getElementById(
+                            "variable-content").style.visibility = "hidden";
+                        document.getElementById(
+                            "controls").style.display = "none";
+                        document.getElementById(
+                            "game-title").style.display = "none";
+                        //Menyembunyikan menu pause jika sedang tidak dipause
+                        document.getElementById(
+                            "pauseScreen").style.display = "none";
                     } else {
                         if (key == p) {
                             paused = true;
+                            // Menampilkan menu pause jika menekan tombol p pada keyboard
+                            document.getElementById(
+                                "pauseScreen").style.display = "block";
                             music.overworld.pause()
                             character.onPause()
                         }
@@ -284,6 +297,9 @@ function World() {
                             document.location.reload(true);
                     }
                 );
+                // Menampilkan menu dengan button "Restart Game"
+                document.getElementById(
+                    "lossScreen").style.display = "block";
 
             }
         }
