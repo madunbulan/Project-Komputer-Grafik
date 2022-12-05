@@ -166,8 +166,6 @@ function World() {
                             "variable-content").style.visibility = "hidden";
                         document.getElementById(
                             "controls").style.display = "none";
-                        document.getElementById(
-                            "game-title").style.display = "none";
                         //Menyembunyikan menu pause jika sedang tidak dipause
                         document.getElementById(
                             "pauseScreen").style.display = "none";
@@ -206,6 +204,16 @@ function World() {
                 keysAllowed = {};
             }
         );
+
+
+        // Inisialisasi score dan kesulitan
+        score = 0;
+        difficulty = 0;
+        document.getElementById("score").innerHTML = score;
+        if (localStorage.getItem("highscore") === null) {
+            localStorage.setItem("highscore", 0);
+        }
+        document.getElementById("highscore").innerHTML = localStorage.getItem("highscore");
 
         //memulai loop rendering.
         loop();
@@ -264,11 +272,12 @@ function World() {
             }
 
 
+            //mendekatkan pohon dengan karakter
             objects.forEach(function(object) {
                 object.mesh.position.z += 100;
             });
 
-
+            //memfilter agar pohon tidak keluar dari environment game
             objects = objects.filter(function(object) {
                 return object.mesh.position.z < 0;
             });
@@ -300,8 +309,61 @@ function World() {
                 // Menampilkan menu dengan button "Restart Game"
                 document.getElementById(
                     "lossScreen").style.display = "block";
+                var table = document.getElementById("ranks");
+                var rankNames = ["Achv1", "Achv2", "Achv3", "Achv4",
+                    "Achv5", "Achv6", "Achv7", "Achv8"
+                ];
+                var rankIndex = Math.floor(score / 15000);
+
+                // If applicable, display the next achievable rank.
+                if (score < 124000) {
+                    var nextRankRow = table.insertRow(0);
+                    nextRankRow.insertCell(0).innerHTML = (rankIndex <= 5) ?
+                        "".concat((rankIndex + 1) * 15, "k-", (rankIndex + 2) * 15, "k") :
+                        (rankIndex == 6) ?
+                        "105k-124k" :
+                        "124k+";
+                    nextRankRow.insertCell(1).innerHTML = "*Score within this range to earn the next rank*";
+                }
+
+                // Display the achieved rank.
+                var achievedRankRow = table.insertRow(0);
+                achievedRankRow.insertCell(0).innerHTML = (rankIndex <= 6) ?
+                    "".concat(rankIndex * 15, "k-", (rankIndex + 1) * 15, "k").bold() :
+                    (score < 124000) ?
+                    "105k-124k".bold() :
+                    "124k+".bold();
+                achievedRankRow.insertCell(1).innerHTML = (rankIndex <= 6) ?
+                    "Congrats! You're a ".concat(rankNames[rankIndex], "!").bold() :
+                    (score < 124000) ?
+                    "Congrats! You're a ".concat(rankNames[7], "!").bold() :
+                    "Congrats! You exceeded the creator's high score of 123790 and beat the game!".bold();
+
+                // Display all ranks lower than the achieved rank.
+                if (score >= 120000) {
+                    rankIndex = 7;
+                }
+                for (var i = 0; i < rankIndex; i++) {
+                    var row = table.insertRow(i);
+                    row.insertCell(0).innerHTML = "".concat(i * 15, "k-", (i + 1) * 15, "k");
+                    row.insertCell(1).innerHTML = rankNames[i];
+                }
+                if (score > 124000) {
+                    var row = table.insertRow(7);
+                    row.insertCell(0).innerHTML = "105k-124k";
+                    row.insertCell(1).innerHTML = rankNames[7];
+                }
 
             }
+            // Update the scores.
+            score += 10;
+            document.getElementById("score").innerHTML = score;
+
+            // Highscore
+            if (score > localStorage.getItem("highscore")) {
+                localStorage.setItem("highscore", score);
+            }
+            document.getElementById("highscore").innerHTML = localStorage.getItem("highscore");
         }
 
         renderer.render(scene, camera);

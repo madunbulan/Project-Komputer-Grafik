@@ -7,12 +7,19 @@
     <script type="text/javascript" src="js/modeling.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js" integrity="sha512-L6Z/YtIPQ7eU3BProP34WGU5yIRk7tNHk7vaC2dB1Vy1atz6wl9mCkTPPZ2Rn1qPr+vY2mZ9odZLdGYuaBk7dQ==" crossorigin="anonymous"></script>
     <link href="game.css" rel="stylesheet">
+    <script type="text/javascript" src="js/fpscounter.js"></script>
 </head>
 
 <body>
     <div class="panel">
         <div id="game-title" class="game-title">
             <div class="title">Wild Run</div>
+        </div>
+        <div class="stat">
+            <label>Score</label>
+            <p id="score">0</p><br>
+            <label>High Score</label>
+            <p id="highscore">0</p>
         </div>
         <table id="controls">
             <tr>
@@ -44,12 +51,17 @@
     <div id="lossScreen">
         <div id="subScreen">
             <h1 id="titlegameover">Game Over!</h1>
+            <div class="tablerank">
+                <table id="ranks"></table>
+            </div>
             <h2 id="instructionsz">Click "Restart Game" or press the down arrow key!</h2>
             <div id="buttons">
                 <button class="button" onclick="restart()"> Restart Game </button>
             </div>
         </div>
 
+
+    </div>
 
     </div>
 </body>

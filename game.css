@@ -234,3 +234,10 @@ canvas {
 #lossScreen {
     display: none;
 }
+
+table#ranks {
+    margin-top: 1em;
+    margin-left: auto;
+    margin-right: auto;
+    color: white;
+}
