@@ -310,8 +310,8 @@ function World() {
                 document.getElementById(
                     "lossScreen").style.display = "block";
                 var table = document.getElementById("ranks");
-                var rankNames = ["Achv1", "Achv2", "Achv3", "Achv4",
-                    "Achv5", "Achv6", "Achv7", "Achv8"
+                var rankNames = ["Ametur", "Much better than ametur", "You are an athlete", "Your speed is unreal",
+                    "Who are you?", "God among man", "You reach the future", "You are the God of Speed"
                 ];
                 var rankIndex = Math.floor(score / 15000);
 
