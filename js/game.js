@@ -326,7 +326,7 @@ function World() {
                 document.getElementById(
                     "lossScreen").style.display = "block";
                 var table = document.getElementById("ranks");
-                var rankNames = ["Ametur", "Much better than ametur", "You are an athlete", "Your speed is unreal",
+                var rankNames = ["Ameteur", "Much better than ameteur", "You are an athlete", "Your speed is unreal",
                     "Who are you?", "God among man", "You reach the future", "You are the God of Speed"
                 ];
                 var rankIndex = Math.floor(score / 15000);
