@@ -241,3 +241,29 @@ table#ranks {
     margin-right: auto;
     color: white;
 }
+
+#player-container #play-pause {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    text-indent: -999999px;
+    height: 40px;
+    width: 40px;
+    padding: 12px 18px;
+    z-index: 2;
+    background-image: url(img/play.png);
+    background-repeat: no-repeat!important;
+    background-position: center;
+    background-size: 30px;
+    margin-right: 3em;
+    margin-top: 1.5em;
+}
+
+.play {
+    background-image: url(img/play.png);
+}
+
+.pause {
+    background-image: url(img/pause.png)!important;
+}

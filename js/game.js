@@ -53,6 +53,22 @@ function World() {
         })
     }
 
+    var audiomethod = "play";
+    var controlBtn = document.getElementById('play-pause');
+
+    controlBtn.addEventListener('click', function() {
+        if (controlBtn.classList.contains('play')) {
+            controlBtn.classList.remove('play');
+            controlBtn.classList.add('pause');
+            audiomethod = "mute";
+            music.overworld.pause();
+        } else {
+            controlBtn.classList.remove('pause');
+            controlBtn.classList.add('play');
+            audiomethod = "play";
+            music.overworld.play();
+        }
+    });
 
     // inisialisasi world.
     init();
@@ -158,7 +174,7 @@ function World() {
                     keysAllowed[key] = false;
                     if (paused && !collisionsDetected() && key > 18) {
                         // memainkan background musik
-                        music.overworld.play()
+                        music.overworld[audiomethod]()
                         paused = false;
                         character.onUnpause();
                         //menyembunyikan instruksi permainan jika game sudah dimulai
