@@ -326,7 +326,7 @@ function World() {
                 document.getElementById(
                     "lossScreen").style.display = "block";
                 var table = document.getElementById("ranks");
-                var rankNames = ["Ameteur", "Much better than ameteur", "You are an athlete", "Your speed is unreal",
+                var rankNames = ["Amateur", "Much better than amateur", "You are an athlete", "Your speed is unreal",
                     "Who are you?", "God among man", "You reach the future", "You are the God of Speed"
                 ];
                 var rankIndex = Math.floor(score / 15000);
@@ -350,9 +350,9 @@ function World() {
                     "105k-124k".bold() :
                     "124k+".bold();
                 achievedRankRow.insertCell(1).innerHTML = (rankIndex <= 6) ?
-                    "Congrats! You're a ".concat(rankNames[rankIndex], "!").bold() :
+                    "Congrats! ".concat(rankNames[rankIndex], "!").bold() :
                     (score < 124000) ?
-                    "Congrats! You're a ".concat(rankNames[7], "!").bold() :
+                    "Congrats! ".concat(rankNames[7], "!").bold() :
                     "Congrats! You exceeded the creator's high score of 123790 and beat the game!".bold();
 
                 // Display all ranks lower than the achieved rank.
